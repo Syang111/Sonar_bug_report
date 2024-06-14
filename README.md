@@ -16,7 +16,7 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   ```sql
   CREATE TABLE IF NOT EXISTS t0(c0 DECIMAL);
   REPLACE INTO t0(c0) VALUES(0.1);
-  SELECT t0.c0 FROM t0 WHERE t0.c0 <= - 0.8; -- expected:{} actual{0}
+  SELECT t0.c0 FROM t0 WHERE t0.c0 <= - 0.8; -- expected:{} actual:{0}
   ```
 
 * #2 http://bugs.mysql.com/108937
