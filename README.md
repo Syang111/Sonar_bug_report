@@ -5,7 +5,7 @@ To alleviate the burden on developers in identifying the root cause, we have sim
 
 ## MySQL
 
-* #1 [http://bugs.mysql.com/108936](https://bugs.mysql.com/bug.php?id=114196)
+* #1 [http://bugs.mysql.com/114196](https://bugs.mysql.com/bug.php?id=114196)
 
   **Status**: fixed
 
