@@ -75,3 +75,194 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   
   SELECT f1 FROM (SELECT (t0.c0 - SUBDATE('2022-07-06' ,INTERVAL 47 MINUTE)) AS f1 FROM t0) AS t; -- expected:{-2021} actual:{-20220705231299}
   ```
+
+
+* #4[ http://bugs.mysql.com/114224](https://bugs.mysql.com/bug.php?id=114224)
+
+  **Status**: Verified
+ 
+  **Version**: 8.0
+ 
+  **Test case**
+ 
+  ```sql
+  CREATE TABLE t0(c0 TINYINT);
+  CREATE INDEX i0 ON t0(c0 DESC); 
+  INSERT IGNORE INTO t0(c0) VALUES("c");
+  
+  SELECT t0.c0 FROM t0 WHERE t0.c0=ABS(0.1); -- expected:{} actual:{0}
+  ```
+
+* #5[ http://bugs.mysql.com/114282](https://bugs.mysql.com/bug.php?id=114282)
+
+  **Status**: Verified
+ 
+  **Version**: 8.0.35
+ 
+  **Test case**
+ 
+  ```sql
+  CREATE TABLE t0(c0 FLOAT) ;
+  INSERT INTO t0(c0) VALUES(NULL);
+  
+  SELECT COALESCE(t0.c0, 400145287) AS f1 FROM t0 GROUP BY c0 HAVING (f1) & (0.6979778231950815);
+  Empty set (0.01 sec)
+  
+  SELECT f1 FROM (SELECT COALESCE(t0.c0, 400145287) AS f1, (COALESCE(t0.c0, 400145287) & (0.6979778231950815)) IS TRUE AS flag FROM t0 GROUP BY c0 HAVING flag=1) as t;
+  +-----------+
+  | f1        |
+  +-----------+
+  | 400145000 |
+  +-----------+
+  ```
+
+* #6[ http://bugs.mysql.com/114384](https://bugs.mysql.com/bug.php?id=114384)
+
+  **Status**: Verified
+ 
+  **Version**: 8.0.15,8.0.36
+ 
+  **Test case**
+ 
+  ```sql
+  CREATE TABLE IF NOT EXISTS t1(c0 SMALLINT) ;
+  INSERT INTO t1(c0) VALUES(0.49);
+  CREATE INDEX i0 ON t1(c0);
+  
+  SELECT t1.c0 FROM t1 WHERE t1.c0 IN (LOG(0.6261534882548163));
+  +------+
+  | c0   |
+  +------+
+  |    0 |
+  +------+
+  1 row in set (0.00 sec)
+  
+  SELECT c0 FROM (SELECT t1.c0, (t1.c0 IN (LOG(0.6261534882548163))) IS TRUE AS flag FROM t1) as t WHERE flag=1;
+  Empty set (0.00 sec)
+  ```
+
+* #7[ http://bugs.mysql.com/114383](https://bugs.mysql.com/bug.php?id=114383)
+
+  **Status**: Verified
+ 
+  **Version**: 8.0.23,8.0.35
+ 
+  **Test case**
+ 
+  ```sql
+  CREATE TABLE IF NOT EXISTS t0(c0 INT) ;
+  REPLACE DELAYED INTO t0(c0) VALUES(-1);
+  
+  SELECT ALL f1 FROM (SELECT ALL (MAX(DATE('2024-01-01 ')) OVER (PARTITION BY t0.c0)) AS f1 FROM t0) as t WHERE (f1) > (1.105003755E9);
+  +------------+
+  | f1         |
+  +------------+
+  | 2024-01-01 |
+  +------------+
+  1 row in set, 2 warnings (0.00 sec)
+  
+  SELECT f1 FROM (SELECT (MAX(DATE('2024-01-01 ')) OVER (PARTITION BY t0.c0)) AS f1, ((MAX(DATE('2024-01-01 ')) OVER (PARTITION BY t0.c0)) > (1.105003755E9)) IS TRUE AS flag FROM t0) as t WHERE flag=1;
+  Empty set, 2 warnings (0.00 sec)
+  ```
+
+* #8[ http://bugs.mysql.com/114382](https://bugs.mysql.com/bug.php?id=114382)
+
+  **Status**: Verified
+ 
+  **Version**: 8.0.11,8.0.36
+ 
+  **Test case**
+ 
+  ```sql
+  CREATE TABLE IF NOT EXISTS t1(c0 TINYINT(199)) ;
+  INSERT LOW_PRIORITY IGNORE INTO t1(c0) VALUES (1950654919);
+
+  SELECT f1 FROM (SELECT (LEAST(CURDATE(), (- (t1.c0)), (~ (t1.c0)),  EXISTS (SELECT 1))) AS f1 FROM t1) as t WHERE f1;
+  +------+
+  | f1   |
+  +------+
+  | -127 |
+  +------+
+  1 row in set, 3 warnings (0.00 sec)
+  
+  SELECT f1 FROM (SELECT (LEAST(CURDATE(), (- (t1.c0)),  EXISTS (SELECT 1))) AS f1, (LEAST(CURDATE(), (- (t1.c0)),   EXISTS (SELECT 1)) ) IS TRUE AS flag FROM t1) as t WHERE flag=1;
+  Empty set, 6 warnings (0.00 sec)
+  ```
+
+* #9[ http://bugs.mysql.com/114381](https://bugs.mysql.com/bug.php?id=114381)
+
+  **Status**: Verified
+ 
+  **Version**: 8.0.19,8.0.35
+ 
+  **Test case**
+ 
+  ```sql
+  CREATE TABLE t0(c0 DOUBLE) ;
+  CREATE TABLE t1 LIKE t0;
+  INSERT IGNORE INTO t1(c0) VALUES(1);
+  INSERT INTO t0(c0) VALUES(0.1);
+
+  SELECT t1.c0 AS _c0 FROM t1, t0 WHERE (( EXISTS (SELECT 1 )) < ((NOT t0.c0))) IN (((t1.c0) XOR ("")) / (TIMEDIFF('3939-09-13 16:49:10.309835', '4722-09-08 23:55:52.675528')));
+  +------+
+  | _c0  |
+  +------+
+  |    1 |
+  +------+
+  1 row in set, 1 warning (0.00 sec)
+
+  SELECT _c0 FROM (SELECT t1.c0 AS _c0, ((( EXISTS (SELECT 1 )) < ((NOT t0.c0))) IN (((t1.c0) XOR ("")) / (TIMEDIFF('3939-09-13 16:49:10.309835', '4722-09-08 23:55:52.675528')))) IS TRUE AS flag FROM t1, t0) as t     WHERE flag=1;
+ 
+  Empty set, 1 warning (0.00 sec)
+  ```
+
+* #10[ http://bugs.mysql.com/114380](https://bugs.mysql.com/bug.php?id=114380)
+
+  **Status**: Verified
+ 
+  **Version**: 8.0.13,8.0.36
+ 
+  **Test case**
+ 
+  ```sql
+  CREATE TABLE t0(c1 FLOAT) ;
+  INSERT INTO t0(c1) VALUES(0.1);
+  
+  SELECT f1 FROM (SELECT (LEAST('-2',  EXISTS (SELECT 1  ), CAST(t0.c1 AS SIGNED), TIMESTAMP('2024-03-17'))) AS f1 FROM t0) as t WHERE f1;
+  +------+
+  | f1   |
+  +------+
+  | -2   |
+  +------+
+  1 row in set, 3 warnings (0.00 sec)
+  
+  SELECT f1 FROM (SELECT (LEAST('-2',  EXISTS (SELECT 1  ), CAST(t0.c1 AS SIGNED), TIMESTAMP('2024-03-17'))) AS f1, (LEAST('-2',  EXISTS (SELECT 1  ), CAST(t0.c1 AS SIGNED), TIMESTAMP('2024-03-17'))) IS TRUE AS    
+  flag FROM t0) as t WHERE flag=1;
+  Empty set, 6 warnings (0.00 sec)
+  ```
+
+* #11[ http://bugs.mysql.com/114379](https://bugs.mysql.com/bug.php?id=114379)
+
+  **Status**: Verified
+ 
+  **Version**: 8.0.21,8.0.35
+ 
+  **Test case**
+ 
+  ```sql
+  CREATE TABLE t0(c0 FLOAT) ;
+  CREATE TABLE t1(c0 DECIMAL);
+  INSERT INTO t1(c0) VALUES(1);
+  CREATE INDEX i1 ON t0((t0.c0 IS NOT TRUE), ((t0.c0 IS NOT FALSE) & (NULL XOR t0.c0)));
+
+  SELECT t1.c0 AS _c0 FROM t1 LEFT OUTER JOIN t0 ON 1 WHERE t0.c0 IS NOT TRUE;
+  +------+
+  | _c0  |
+  +------+
+  |    1 |
+  +------+
+  1 row in set (0.00 sec)
+  
+  SELECT _c0 FROM (SELECT  t1.c0 AS _c0, (t0.c0 IS NOT TRUE) IS TRUE AS flag FROM t1 LEFT OUTER JOIN t0 ON 1 ) as t WHERE flag=1;
+  Empty set (0.00 sec)
+  ```
