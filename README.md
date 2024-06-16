@@ -212,7 +212,6 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   1 row in set, 1 warning (0.00 sec)
 
   SELECT _c0 FROM (SELECT t1.c0 AS _c0, ((( EXISTS (SELECT 1 )) < ((NOT t0.c0))) IN (((t1.c0) XOR ("")) / (TIMEDIFF('3939-09-13 16:49:10.309835', '4722-09-08 23:55:52.675528')))) IS TRUE AS flag FROM t1, t0) as t     WHERE flag=1;
- 
   Empty set, 1 warning (0.00 sec)
   ```
 
@@ -266,3 +265,64 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   SELECT _c0 FROM (SELECT  t1.c0 AS _c0, (t0.c0 IS NOT TRUE) IS TRUE AS flag FROM t1 LEFT OUTER JOIN t0 ON 1 ) as t WHERE flag=1;
   Empty set (0.00 sec)
   ```
+
+* #12[ http://bugs.mysql.com/114378](https://bugs.mysql.com/bug.php?id=114378)
+
+  **Status**: Verified
+ 
+  **Version**: 8.0
+ 
+  **Test case**
+ 
+  ```sql
+  CREATE TABLE t0(c0 FLOAT);
+  INSERT INTO t0(c0) VALUES(-1);
+  
+  SELECT f1 FROM (SELECT ((t0.c0) ^ (CONVERT_TZ('2001-10-22 16:13:59.9', 'GMT','MET'))) AS f1 FROM t0) as t WHERE (f1) > (1); 
+  +----------------------+
+  | f1                   |
+  +----------------------+
+  | 18446724062687370255 |
+  +----------------------+
+  1 row in set (0.00 sec)
+  
+  SELECT ALL f1 FROM (SELECT ((t0.c0) ^ (CONVERT_TZ('2001-10-22 16:13:59.9', 'GMT','MET'))) AS f1, (((t0.c0) ^ (CONVERT_TZ('2001-10-22 16:13:59.9', 'GMT','MET'))) > (1)) IS TRUE AS flag FROM t0) as t WHERE flag=1;
+  +----------------------+
+  | f1                   |
+  +----------------------+
+  | 18446724062687370215 |
+  +----------------------+
+  1 row in set (0.00 sec)
+  ```
+
+* #13[ http://bugs.mysql.com/113578](https://bugs.mysql.com/bug.php?id=113578)
+
+  **Status**: Verified
+ 
+  **Version**: 8.0
+ 
+  **Test case**
+ 
+  ```sql
+  CREATE TABLE IF NOT EXISTS t1(c0 int) ;
+  REPLACE INTO t1(c0) VALUES(1),(2);
+  
+  SELECT AVG(-1.7E308) AS f1 FROM t1 HAVING f1;
+  +------+
+  | f1   |
+  +------+
+  |    0 |
+  +------+
+  1 row in set (0.00 sec)
+  
+  mysql> SELECT f1 FROM (SELECT AVG(-1.7E308) AS f1, AVG(-1.7E308) IS TRUE AS flag FROM t1 HAVING flag=1) AS tmp_t;
+  +-------------------------+
+  | f1                      |
+  +-------------------------+
+  | -1.7976931348623157e308 |
+  +-------------------------+
+  1 row in set (0.00 sec)
+  ```
+
+
+
