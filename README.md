@@ -315,7 +315,7 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   +------+
   1 row in set (0.00 sec)
   
-  mysql> SELECT f1 FROM (SELECT AVG(-1.7E308) AS f1, AVG(-1.7E308) IS TRUE AS flag FROM t1 HAVING flag=1) AS tmp_t;
+  SELECT f1 FROM (SELECT AVG(-1.7E308) AS f1, AVG(-1.7E308) IS TRUE AS flag FROM t1 HAVING flag=1) AS tmp_t;
   +-------------------------+
   | f1                      |
   +-------------------------+
@@ -339,7 +339,7 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   REPLACE INTO t0(c0) VALUES (0.40194983109852933);
   CREATE VIEW v0(c0) AS SELECT CAST(')' AS TIME) FROM t0 WHERE '0.030417148673465677';
   
-  mysql> SELECT f1 FROM (SELECT NULLIF(v0.c0, 1371581446) AS f1 FROM v0, t0) AS t WHERE f1 <=> 1292367147;
+  SELECT f1 FROM (SELECT NULLIF(v0.c0, 1371581446) AS f1 FROM v0, t0) AS t WHERE f1 <=> 1292367147;
   +------+
   | f1   |
   +------+
@@ -347,8 +347,237 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   +------+
   1 row in set, 3 warnings (0.01 sec)
   
-  mysql> SELECT f1 FROM (SELECT NULLIF(v0.c0, 1371581446) AS f1, (NULLIF(v0.c0, 1371581446) <=> 1292367147 ) IS TRUE AS flag FROM v0, t0) AS t WHERE flag=1;
+  SELECT f1 FROM (SELECT NULLIF(v0.c0, 1371581446) AS f1, (NULLIF(v0.c0, 1371581446) <=> 1292367147 ) IS TRUE AS flag FROM v0, t0) AS t WHERE flag=1;
   Empty set, 3 warnings (0.00 sec)
+  ```
+  
+* #2 [https://github.com/pingcap/tidb/issues/51096](https://github.com/pingcap/tidb/issues/51096)
+
+  **Status**: Verified
+
+  **Version**: v7.5.0
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE t0(c0 NUMERIC UNSIGNED , c1 DOUBLE, c2 BOOL );
+  REPLACE INTO t0 VALUES (1726229803, 0.15695553372105964, false);
+  
+  SELECT f1 FROM (SELECT (((t0.c0)/(1475275145))) AS f1 FROM t0) AS t WHERE ((f1)+('?'));
+  +----------------------------------+
+  | f1                               |
+  +----------------------------------+
+  | 1.170107019000000000000000000000 |
+  +----------------------------------+
+  1 row in set, 1 warning (0.00 sec)
+  
+  SELECT f1 FROM (SELECT (((t0.c0)/(1475275145))) AS f1, (((((t0.c0)/(1475275145)))+('?'))) IS TRUE AS flag FROM t0) AS t WHERE flag=1;
+  +--------+
+  | f1     |
+  +--------+
+  | 1.1701 |
+  +--------+
+  1 row in set, 1 warning (0.00 sec)
+  ```
+* #3 [https://github.com/pingcap/tidb/issues/51840](https://github.com/pingcap/tidb/issues/51840)
+
+  **Status**: Verified
+
+  **Version**: v5.0.1,v7.6.0 
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE t0(c0 BIGINT , c1 BLOB(301) , c2 BOOL);
+  INSERT INTO t0 VALUES (1, 1, 1);
+  
+  SELECT f1 FROM (SELECT (CONNECTION_ID()) AS f1 FROM t0) AS t WHERE ((f1)>=(-1.487944961E9));  --query1
+  Empty set (0.00 sec)
+  
+  SELECT f1 FROM (SELECT (CONNECTION_ID()) AS f1, (((CONNECTION_ID())>=(-1.487944961E9))) IS TRUE AS flag FROM t0) AS t  WHERE flag=1;  --query2
+  +---------+
+  | f1      |
+  +---------+
+  | 2097158 |
+  +---------+
+  1 row in set (0.00 sec)
+  ```
+
+* #4 [https://github.com/pingcap/tidb/issues/51361](https://github.com/pingcap/tidb/issues/51361)
+
+  **Status**: Verified
+
+  **Version**: v7.6.0 
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE t0(c0 FLOAT);
+  CREATE VIEW v0(c0) AS SELECT t0.c0 FROM t0;
+  INSERT INTO t0(c0) VALUES (NULL);
+  
+  SELECT t0.c0 FROM v0 LEFT JOIN t0 ON 1 WHERE (TIMEDIFF( '2003-07-13', '2007-06-25') AND true);
+  +------+
+  | c0   |
+  +------+
+  | NULL |
+  +------+
+  1 row in set, 2 warnings (0.01 sec)
+  
+  SELECT c0 FROM (SELECT t0.c0, (TIMEDIFF('2003-07-13', '2007-06-25') AND true) IS TRUE AS flag FROM v0 LEFT JOIN t0 ON 1) AS t WHERE flag=1;
+  +------------+
+  | c0         |
+  +------------+
+  | 1.4013e-45 |
+  +------------+
+  1 row in set, 4 warnings (0.01 sec)
+  ```
+
+* #5 [https://github.com/pingcap/tidb/issues/51359](https://github.com/pingcap/tidb/issues/51359)
+
+  **Status**: Verified
+
+  **Version**: v7.6.0 
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE t0(c0 BOOL);
+  REPLACE INTO t0(c0) VALUES (false), (true);
+  CREATE VIEW v0(c0) AS SELECT (REGEXP_LIKE(t0.c0, t0.c0)) FROM t0 WHERE t0.c0 GROUP BY t0.c0 HAVING 1;
+ 
+  SELECT t0.c0 FROM v0, t0 WHERE (SUBTIME('2001-11-28 06', '252 10') OR ('' IS NOT NULL));
+  +------+
+  | c0   |
+  +------+
+  |    0 |
+  |    1 |
+  +------+
+  2 rows in set, 3 warnings (0.00 sec)
+  
+  SELECT t0.c0 FROM v0, t0 WHERE (SUBTIME('2001-11-28 06', '252 10') OR ('' IS NOT NULL)) AND v0.c0;
+  +------+
+  | c0   |
+  +------+
+  |    1 |
+  |    1 |
+  +------+
+  2 rows in set, 3 warnings (0.00 sec)
+  ```
+
+* #6 [https://github.com/pingcap/tidb/issues/51350](https://github.com/pingcap/tidb/issues/51350)
+
+  **Status**: Verified
+
+  **Version**: v7.6.0 
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE t1(c0 FLOAT,c1 FLOAT);
+  INSERT INTO t1 VALUES (0, 1.1);
+  CREATE VIEW v0(c1, c2) AS SELECT t1.c0, CAST(t1.c1 AS DECIMAL) FROM t1;
+  
+  SELECT v0.c2 FROM v0;
+  +------+
+  | c2   |
+  +------+
+  |    1 |
+  +------+
+  1 row in set, 1 warning (0.00 sec)
+  
+  SELECT v0.c2 FROM v0 WHERE (CASE v0.c2 WHEN v0.c1 THEN 1 ELSE 1 END );
+  +----------------------------------+
+  | c2                               |
+  +----------------------------------+
+  | 1.100000023841858000000000000000 |
+  +----------------------------------+
+  1 row in set (0.00 sec)
+  ```
+
+* #7 [https://github.com/pingcap/tidb/issues/51292](https://github.com/pingcap/tidb/issues/51292)
+
+  **Status**: fixed
+
+  **Version**: v7.5.0 
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE t0(c0 DECIMAL ZEROFILL UNIQUE , c1 BOOL ZEROFILL AS (-1));
+  INSERT IGNORE  INTO t0(c0) VALUES (NULL);
+  CREATE INDEX i0 ON t0(c1 ASC, c0 DESC);
+  
+  SELECT t0.c1 FROM t0;
+  +------+
+  | c1   |
+  +------+
+  |  255 |
+  +------+
+  1 row in set (0.00 sec)
+  
+  SELECT t0.c1 FROM t0 WHERE (t0.c0 IS NULL);
+  +------+
+  | c1   |
+  +------+
+  |    0 |
+  +------+
+  1 row in set, 1 warning (0.00 sec)
+  ```
+
+* #8 [https://github.com/pingcap/tidb/issues/51290](https://github.com/pingcap/tidb/issues/51290)
+
+  **Status**: Verified
+
+  **Version**: v7.5.0 
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE t0(c0 TINYINT);
+  CREATE VIEW v0(c0) AS SELECT t0.c0 FROM t0 GROUP BY '1';
+  INSERT IGNORE INTO t0(c0) VALUES (-1);
+    
+  SELECT t0.c0 AS f1, (TIMEDIFF('2001-11-25', '2008-03-06') AND 1 ) IS TRUE AS flag FROM t0 INNER JOIN v0;
+  +------+------+
+  | f1   | flag |
+  +------+------+
+  |   -1 |    1 |
+  +------+------+
+  1 row in set, 2 warnings (0.01 sec)
+    
+  SELECT f1 FROM (SELECT t0.c0 AS f1, (TIMEDIFF('2001-11-25', '2008-03-06') AND 1 ) IS TRUE AS flag FROM t0 INNER JOIN v0) AS t WHERE flag=1;
+  +------+
+  | f1   |
+  +------+
+  |    1 |
+  +------+
+  1 row in set, 4 warnings (0.00 sec)
+  ```
+
+* #9 [https://github.com/pingcap/tidb/issues/51841](https://github.com/pingcap/tidb/issues/51841)
+
+  **Status**: Verified
+
+  **Version**: v5.3.2, v7.6.0
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE t0(c0 TEXT(119));
+  INSERT INTO t0 VALUES ('?');
+  CREATE VIEW v4(c0) AS SELECT CAST(t0.c0 AS DECIMAL) FROM t0;
+  
+  SELECT v4.c0 AS _c0 FROM v4 WHERE (v4.c0 = COALESCE(-164345996, v4.c0, CASE v4.c0 WHEN -546905304 THEN 'e' ELSE 1760598647 END)) LIKE v4.c0;  --query1
+  Empty set, 3 warnings (0.01 sec)
+  
+  SELECT _c0 FROM (SELECT v4.c0 AS _c0, (v4.c0 = COALESCE(-164345996, v4.c0, CASE v4.c0 WHEN -546905304 THEN 'e' ELSE 1760598647 END)) LIKE v4.c0 AS flag FROM v4) AS t WHERE flag = 1; --query2
+  +------+
+  | _c0  |
+  +------+
+  |    0 |
+  +------+
+  1 row in set, 3 warnings (0.00 sec)
   ```
 
 ## SQLite
