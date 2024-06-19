@@ -324,6 +324,8 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   1 row in set (0.00 sec)
   ```
 
+
+
 ## TiDB
 
 * #1 [https://github.com/pingcap/tidb/issues/51842](https://github.com/pingcap/tidb/issues/51842)
@@ -580,6 +582,8 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   1 row in set, 3 warnings (0.00 sec)
   ```
 
+
+
 ## SQLite
 
 * #1 [https://sqlite.org/forum/forumpost/9dcb5f4c4a](https://sqlite.org/forum/forumpost/9dcb5f4c4a)
@@ -598,4 +602,94 @@ To alleviate the burden on developers in identifying the root cause, we have sim
 
   SELECT aggr FROM (SELECT SUM(1.7976931348623157E308) as aggr, (c0 > 1) is true as flag FROM t0) WHERE flag=1; -- {}
   ```
+
+* #2 [https://sqlite.org/forum/info/1bb055be177e4e4c](https://sqlite.org/forum/info/1bb055be177e4e4c)
+
+  **Status**: fixed
+
+  **Version**: 3.46.0
+
+  **Test case**
+
+  ```sql
+  CREATE VIRTUAL TABLE rt1 USING rtree_i32(c0, c1, c2, +c3 INT );
+  INSERT INTO rt1(c0, c2, c3) VALUES ('9223372036854775807', '1840618558', 0.35548821863495284);
+  CREATE VIEW v0(c4) AS SELECT CAST(COALESCE(DISTINCT c0,c0) AS BLOB) FROM rt1;
+  
+  SELECT (c0==CAST(c4 AS REAL)) AS f1 FROM rt1, v0 WHERE f1; -- {0}
+  
+  SELECT f1 FROM (SELECT (c0==CAST(c4 AS REAL)) AS f1, (c0==CAST(c4 AS REAL)) IS TRUE AS flag FROM rt1, v0 WHERE flag=1); -- {}
+  ```
+
+* #3 [https://sqlite.org/forum/forumpost/40da29c1f6](https://sqlite.org/forum/forumpost/40da29c1f6)
+
+  **Status**: fixed
+
+  **Version**: 3.46.0
+
+  **Test case**
+
+  ```sql
+  CREATE VIRTUAL TABLE vt0 USING fts5(c0, c1 UNINDEXED);
+  CREATE TABLE t1 (c2 float);
+  CREATE INDEX i0 ON t1(NULL);
+  INSERT INTO t1(c2) VALUES (0.2);
+  CREATE VIEW v0(c3) AS SELECT DISTINCT c2 FROM t1;
+
+  SELECT c2 FROM v0 FULL OUTER JOIN vt0 ON ((UPPER( c3))<(NULL)) LEFT OUTER JOIN t1 ON 1; -- {0.2}
+  
+  SELECT c2 FROM v0 FULL OUTER JOIN vt0 ON ((UPPER( c3))<(NULL)) LEFT OUTER JOIN t1 ON 1 WHERE c2/0.1; -- {}
+  ```
+
+* #4 [https://sqlite.org/forum/forumpost/8a6e383777](https://sqlite.org/forum/forumpost/8a6e383777)
+
+  **Status**: fixed
+
+  **Version**: 3.46.0
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE v0 ( c1 INTEGER PRIMARY KEY, c2 TEXT);
+  CREATE VIEW v5 AS SELECT c1, COUNT ( * ) AS y, sum ( c2 ) OVER ( PARTITION BY c1) FROM v0;
+
+  SELECT c1 from v5; -- {NULL}
+
+  SELECT c1 FROM v5 WHERE c1 IS NULL; -- {}
+  ```
+  
+* #5 [https://sqlite.org/forum/forumpost/e28e4a3b1a](https://sqlite.org/forum/forumpost/e28e4a3b1a)
+
+  **Status**: fixed
+
+  **Version**: 3.35.0
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE v0 ( c1 INTEGER PRIMARY KEY ON CONFLICT REPLACE, c2 UNIQUE );  
+  INSERT INTO v0 VALUES ( 0, 33 ), ( 11, 22 );
+  REPLACE INTO v0 VALUES ( 0, 11 ) ON CONFLICT ( c2 ) DO UPDATE SET c1 = c2, c2 = c2 ON CONFLICT ( c2 ) DO UPDATE SET c1 = c1, c2 = c1;  
+ 
+  SELECT count(*) FROM v0 WHERE c2 > 8; expected: {2} actual: {3}
+  ```
+
+* #6 [https://sqlite.org/forum/info/d619189e239fc2b9](https://sqlite.org/forum/info/d619189e239fc2b9)
+
+  **Status**: fixed
+
+  **Version**: 3.46.0
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE rt0 (c0 INTEGER, c1 INTEGER, c2 INTEGER, c3 INTEGER, c4 INTEGER);
+  CREATE TABLE rt3 (c0 INTEGER, c1 INTEGER, c2 INTEGER,c3 INTEGER);
+  INSERT OR IGNORE INTO rt0(c3, c1) VALUES (x'', '1'), ('-1', -1e500), (1, x'');
+  CREATE VIEW v6(c0, c1, c2) AS SELECT 0, 0, 0;
+  
+  SELECT COUNT(*) FROM rt0 LEFT OUTER JOIN rt3 ON NULL RIGHT OUTER JOIN v6 ON ((CASE v6.c0 WHEN rt0.c4 THEN rt3.c3 END) NOT BETWEEN (rt0.c4) AND (NULL)) WHERE (rt0.c1); expected: {0} actual: {2}
+
+  ```
+
 
