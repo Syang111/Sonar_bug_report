@@ -324,5 +324,31 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   1 row in set (0.00 sec)
   ```
 
+## TiDB
+
+* #1 [https://github.com/pingcap/tidb/issues/51842](https://github.com/pingcap/tidb/issues/51842)
+
+  **Status**: Verified
+
+  **Version**: v6.4.0, v7.6.0
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE t0(c0 DOUBLE);
+  REPLACE INTO t0(c0) VALUES (0.40194983109852933);
+  CREATE VIEW v0(c0) AS SELECT CAST(')' AS TIME) FROM t0 WHERE '0.030417148673465677';
+  
+  mysql> SELECT f1 FROM (SELECT NULLIF(v0.c0, 1371581446) AS f1 FROM v0, t0) AS t WHERE f1 <=> 1292367147;
+  +------+
+  | f1   |
+  +------+
+  | NULL |
+  +------+
+  1 row in set, 3 warnings (0.01 sec)
+  
+  mysql> SELECT f1 FROM (SELECT NULLIF(v0.c0, 1371581446) AS f1, (NULLIF(v0.c0, 1371581446) <=> 1292367147 ) IS TRUE AS flag FROM v0, t0) AS t WHERE flag=1;
+  Empty set, 3 warnings (0.00 sec)
+  ```
 
 
