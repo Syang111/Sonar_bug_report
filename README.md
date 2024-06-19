@@ -671,7 +671,8 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   INSERT INTO v0 VALUES ( 0, 33 ), ( 11, 22 );
   REPLACE INTO v0 VALUES ( 0, 11 ) ON CONFLICT ( c2 ) DO UPDATE SET c1 = c2, c2 = c2 ON CONFLICT ( c2 ) DO UPDATE SET c1 = c1, c2 = c1;  
  
-  SELECT count(*) FROM v0 WHERE c2 > 8; expected: {2} actual: {3}
+  SELECT count(*) FROM v0 WHERE c2 > 8;
+  -- expected: {2} actual: {3}
   ```
 
 * #6 [https://sqlite.org/forum/info/d619189e239fc2b9](https://sqlite.org/forum/info/d619189e239fc2b9)
@@ -688,7 +689,8 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   INSERT OR IGNORE INTO rt0(c3, c1) VALUES (x'', '1'), ('-1', -1e500), (1, x'');
   CREATE VIEW v6(c0, c1, c2) AS SELECT 0, 0, 0;
   
-  SELECT COUNT(*) FROM rt0 LEFT OUTER JOIN rt3 ON NULL RIGHT OUTER JOIN v6 ON ((CASE v6.c0 WHEN rt0.c4 THEN rt3.c3 END) NOT BETWEEN (rt0.c4) AND (NULL)) WHERE (rt0.c1); expected: {0} actual: {2}
+  SELECT COUNT(*) FROM rt0 LEFT OUTER JOIN rt3 ON NULL RIGHT OUTER JOIN v6 ON ((CASE v6.c0 WHEN rt0.c4 THEN rt3.c3 END) NOT BETWEEN (rt0.c4) AND (NULL)) WHERE (rt0.c1);
+  -- expected: {0} actual: {2}
 
   ```
 
