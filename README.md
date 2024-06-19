@@ -351,4 +351,22 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   Empty set, 3 warnings (0.00 sec)
   ```
 
+## SQLite
+
+* #1 [https://sqlite.org/forum/forumpost/9dcb5f4c4a](https://sqlite.org/forum/forumpost/9dcb5f4c4a)
+
+  **Status**: fixed
+
+  **Version**: 3.43.0
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE t0 (c0 DOUBLE );
+  INSERT INTO t0(c0) VALUES (1),(2),(3);
+
+  SELECT SUM(1.7976931348623157E308) as aggr FROM t0 WHERE c0 > 1; -- {NULL}
+
+  SELECT aggr FROM (SELECT SUM(1.7976931348623157E308) as aggr, (c0 > 1) is true as flag FROM t0) WHERE flag=1; -- {}
+  ```
 
