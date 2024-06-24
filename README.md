@@ -582,7 +582,31 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   1 row in set, 3 warnings (0.00 sec)
   ```
 
+## MariaDB
 
+* #1 [https://jira.mariadb.org/browse/MDEV-33708](https://jira.mariadb.org/browse/MDEV-33708)
+
+  **Status**: open
+
+  **Version**: 10.9,11.4.1
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE IF NOT EXISTS t0(c0 BIGINT);
+  INSERT INTO t0 VALUES (1567981295);
+  
+  mysql> SELECT t0.c0 FROM t0 WHERE COS(t0.c0);
+  Empty set (0.00 sec)
+   
+  mysql> SELECT c0 FROM (SELECT t0.c0, COS(t0.c0) IS TRUE AS flag FROM t0) AS t WHERE flag=1;
+  +------------+
+  | c0         |
+  +------------+
+  | 1567981295 |
+  +------------+
+  1 row in set (0.01 sec)
+  ```
 
 ## SQLite
 
