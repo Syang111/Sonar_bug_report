@@ -31,27 +31,21 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   ```sql
   CREATE TABLE t0(c0 DECIMAL) ;
   REPLACE INTO t0(c0) VALUES("512");
-
-  -- sql1
   
   SELECT f1 FROM (
   SELECT t0.c0 >> IFNULL("\r8*&t", NULL) AS f1 FROM t0
   ) AS t WHERE f1!=123;
-  
   +------+
   | f1   |
   +------+
   |    2 |
   +------+
   1 row in set (0.00 sec)
-  
-  -- sql2
-  
+ 
   SELECT f1 FROM (
   SELECT t0.c0 >> (IFNULL("\r8*&t", NULL)) AS f1,
   ((t0.c0 >> IFNULL("\r8*&t", NULL)) != 123) IS TRUE AS flag FROM t0
   ) AS t WHERE flag=1;
-  
   +------+
   | f1   |
   +------+
