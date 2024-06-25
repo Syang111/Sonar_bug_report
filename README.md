@@ -1,7 +1,7 @@
 # Sonar_bugreports
-This page lists all bugs found by Sonar (https://github.com/Syang111/Sonar). Up to now, we have found xx unique bugs in MySQL, TiDB, MariaDB and SQLite,  with xx verified and xx fixed by developers.
+This page lists all bugs found by Sonar (https://github.com/Syang111/Sonar). Up to now, we have found 37 unique bugs in MySQL, TiDB, MariaDB and SQLite,  with 29 verified and 8 fixed by developers.
 
-To alleviate the burden on developers in identifying the root cause, we have simplified some test cases for bugs discovered by Sonar before reporting them to developers.
+To alleviate the burden on developers in identifying the root cause, we have simplified some test cases for bugs discovered by Sonar before reporting them to developers, so you will find the test cases are not always the oracle form of Sonar.
 
 ## MySQL
 
@@ -680,7 +680,7 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   1 row in set (0.00 sec)
   ```
 
-* #5 [https://jira.mariadb.org/browse/MDEV-33745](https://jira.mariadb.org/browse/MDEV-33345)
+* #5 [https://jira.mariadb.org/browse/MDEV-33345](https://jira.mariadb.org/browse/MDEV-33345)
 
   **Status**: open
 
@@ -709,7 +709,7 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   1 row in set (0.00 sec)
   ```
 
-* #6 [https://jira.mariadb.org/browse/MDEV-33737](https://jira.mariadb.org/browse/MDEV-33337)
+* #6 [https://jira.mariadb.org/browse/MDEV-33337](https://jira.mariadb.org/browse/MDEV-33337)
 
   **Status**: open
 
@@ -733,7 +733,7 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   1 row in set (0.00 sec)
   ```
 
-* #7 [https://jira.mariadb.org/browse/MDEV-33736](https://jira.mariadb.org/browse/MDEV-33336)
+* #7 [https://jira.mariadb.org/browse/MDEV-33336](https://jira.mariadb.org/browse/MDEV-33336)
 
   **Status**: open
 
@@ -762,7 +762,7 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   1 row in set (0.00 sec)
   ```
 
-* #8 [https://jira.mariadb.org/browse/MDEV-33735](https://jira.mariadb.org/browse/MDEV-33335)
+* #8 [https://jira.mariadb.org/browse/MDEV-33335](https://jira.mariadb.org/browse/MDEV-33335)
 
   **Status**: open
 
