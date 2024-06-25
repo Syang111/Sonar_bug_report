@@ -584,7 +584,34 @@ To alleviate the burden on developers in identifying the root cause, we have sim
 
 ## MariaDB
 
-* #1 [https://jira.mariadb.org/browse/MDEV-33708](https://jira.mariadb.org/browse/MDEV-33708)
+* #1 [https://jira.mariadb.org/browse/MDEV-33307](https://jira.mariadb.org/browse/MDEV-33307)
+
+  **Status**: Verified
+
+  **Version**: 10.4,11.4.1
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE t0(c0 DECIMAL NULL, c1 DECIMAL);
+  INSERT IGNORE INTO t0(c0, c1) VALUES('-1', 1); 
+      
+  SELECT f1 FROM (SELECT (t0.c0 - ADDDATE('2024-01-01', 1)) AS f1 FROM t0) as t WHERE f1;
+  +-------+
+  | f1    |
+  +-------+
+  | -2025 |
+  +-------+
+    
+  SELECT f1 FROM (SELECT (t0.c0 - ADDDATE('2024-01-01', 1)) AS f1, (t0.c0 - ADDDATE('2024-01-01', 1)) IS TRUE AS flag FROM t0) as t WHERE flag=1;
+  +-----------+
+  | f1        |
+  +-----------+
+  | -20240103 |
+  +-----------+
+  ```
+
+* #2 [https://jira.mariadb.org/browse/MDEV-33708](https://jira.mariadb.org/browse/MDEV-33708)
 
   **Status**: open
 
@@ -607,6 +634,196 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   +------------+
   1 row in set (0.01 sec)
   ```
+
+* #3 [https://jira.mariadb.org/browse/MDEV-33707](https://jira.mariadb.org/browse/MDEV-33707)
+
+  **Status**: open
+
+  **Version**: 10.4.21, 11.4.1
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE t0(c0 CHAR(100), c1 BIGINT, c2 REAL UNIQUE, PRIMARY KEY(c2, c1, c0));
+  CREATE TABLE t1 LIKE t0;
+  INSERT INTO t0 VALUES ('1', 95607293, -1);
+  
+  mysql> SELECT f1 FROM (SELECT (t0.c1 - (t1.c0 IS TRUE)) AS f1 FROM t1 RIGHT OUTER JOIN t0 ON NULL) AS t WHERE f1 AND 1;
+  Empty set (0.00 sec)
+   
+  mysql> SELECT f1 FROM (SELECT (t0.c1 - (t1.c0 IS TRUE)) AS f1, ((t0.c1 - (t1.c0 IS TRUE)) AND 1) IS TRUE AS flag FROM t1 RIGHT OUTER JOIN t0 ON NULL) AS t WHERE flag=1;
+  +----------+
+  | f1       |
+  +----------+
+  | 95607293 |
+  +----------+
+  1 row in set (0.00 sec)
+  ```
+  
+* #4 [https://jira.mariadb.org/browse/MDEV-33705](https://jira.mariadb.org/browse/MDEV-33705)
+
+  **Status**: open
+
+  **Version**: 10.0.15, 11.4.1
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE t0(c0 BIGINT);
+  CREATE OR REPLACE TABLE t1(c0 VARCHAR(100));
+  INSERT INTO t0 VALUES (-1838284247);
+  INSERT INTO t1 VALUES ('1');
+    
+  mysql> SELECT (t1.c0) AS _c0 FROM t0, t1 WHERE COT(t0.c0);
+  Empty set (0.00 sec)
+
+  mysql> SELECT _c0 FROM (SELECT (t1.c0) AS _c0, (COT(t0.c0)) IS TRUE AS flag FROM t0, t1) AS t WHERE flag=1;
+  +------+
+  | _c0  |
+  +------+
+  | 1    |
+  +------+
+  1 row in set (0.00 sec)
+  ```
+
+* #5 [https://jira.mariadb.org/browse/MDEV-33745](https://jira.mariadb.org/browse/MDEV-33745)
+
+  **Status**: open
+
+  **Version**: 11.4.1
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE t0(c0 CHAR(100)  PRIMARY KEY NOT NULL);
+  INSERT INTO t0 VALUES (1);
+    
+  SELECT f1 FROM (SELECT (t0.c0 % (-1| 1 )) AS f1 FROM t0) AS t WHERE (f1+1); 
+  +-------+
+  | f1    |
+  +-------+
+  | 0     |
+  +-------+
+  1 row in set (0.00 sec)
+  
+  SELECT f1 FROM (SELECT (t0.c0 % (-1| 1 )) AS f1, ((t0.c0 % (-1| 1 ))+1) IS TRUE AS flag FROM t0) AS t WHERE flag=1; 
+  +-------+
+  | f1    |
+  +-------+
+  | 1     |
+  +-------+
+  1 row in set (0.00 sec)
+  ```
+
+* #6 [https://jira.mariadb.org/browse/MDEV-33737](https://jira.mariadb.org/browse/MDEV-33737)
+
+  **Status**: open
+
+  **Version**: 11.4.1
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE t0(c0 INT) ;
+  INSERT INTO t0(c0) VALUES(0.6799213532830038);
+    
+  SELECT f1 FROM (SELECT (t0.c0) / (PERIOD_ADD(196802,2)) AS f1 FROM t0) AS t WHERE f1;  
+  Empty set (0.00 sec)
+  
+  SELECT f1 FROM (SELECT (t0.c0) / (PERIOD_ADD(196802,2)) AS f1, ((t0.c0) / (PERIOD_ADD(196802,2))) IS TRUE AS flag FROM t0) AS t WHERE flag=1;
+  +-----------+
+  | f1        |
+  +-----------+
+  | 0.0000    |
+  +-----------+
+  1 row in set (0.00 sec)
+  ```
+
+* #7 [https://jira.mariadb.org/browse/MDEV-33736](https://jira.mariadb.org/browse/MDEV-33736)
+
+  **Status**: open
+
+  **Version**: 11.4.1
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE IF NOT EXISTS t0(c0 DOUBLE); 
+  INSERT INTO t0(c0) VALUES(1); 
+      
+  SELECT f1 FROM (SELECT ((t0.c0) - (TIMESTAMPADD(MICROSECOND, 4 , '2023-04-18'))) AS f1 FROM t0) as t WHERE f1;
+  +-------+
+  | f1    |
+  +-------+
+  | -2022 |
+  +-------+
+  1 row in set (0.00 sec)
+  
+  SELECT f1 FROM (SELECT ((t0.c0) - (TIMESTAMPADD(MICROSECOND, 4 , '2023-04-18'))) AS f1, ((t0.c0) - (TIMESTAMPADD(MICROSECOND, 4 , '2023-04-18'))) IS TRUE AS flag FROM t0) as t WHERE flag=1;    
+  +------------------+
+  | f1               |
+  +------------------+
+  | -20230417999999  |
+  +------------------+
+  1 row in set (0.00 sec)
+  ```
+
+* #8 [https://jira.mariadb.org/browse/MDEV-33735](https://jira.mariadb.org/browse/MDEV-33735)
+
+  **Status**: open
+
+  **Version**: 11.4.1
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE IF NOT EXISTS t0(c0 SMALLINT); 
+  INSERT INTO t0(c0) VALUES(1);  
+      
+  SELECT DISTINCT (t0.c0) - (SUBDATE('2023-01-01' ,INTERVAL 1 MINUTE)) AS f1 FROM t0 HAVING f1;   
+  +-------+
+  | f1    |
+  +-------+
+  | -2021 |
+  +-------+
+    
+  SELECT f1 FROM (SELECT DISTINCT (t0.c0) - (SUBDATE('2023-01-01' ,INTERVAL 1 MINUTE)) AS f1, ((t0.c0) - (SUBDATE('2023-01-01' ,INTERVAL 1 MINUTE))) IS TRUE AS flag FROM t0 HAVING flag=1) as tmp_t;
+  +-----------------+
+  | f1              |
+  +-----------------+
+  | -20221231235899 |
+  +-----------------+
+  ```
+
+* #9 [https://jira.mariadb.org/browse/MDEV-33555](https://jira.mariadb.org/browse/MDEV-33555)
+
+  **Status**: open
+
+  **Version**: 10.9.1,11.4.1
+
+  **Test case**
+
+  ```sql
+  CREATE TABLE t1(c0 VARCHAR(100));
+  INSERT INTO t1 VALUES ('1');
+      
+  SELECT f1 FROM (SELECT (t1.c0 - (-1^1)) AS f1 FROM t1) AS t;
+  +------------------------+
+  | f1                     |
+  +------------------------+
+  | -1.8446744073709552e19 |
+  +------------------------+
+  1 row in set (0.00 sec)
+    
+  SELECT f1 FROM (SELECT (t1.c0 - (-1^1)) AS f1 FROM t1) AS t WHERE f1;
+  +------+
+  | f1   |
+  +------+
+  |    3 |
+  +------+
+  1 row in set (0.00 sec)
+  ```
+
 
 ## SQLite
 
