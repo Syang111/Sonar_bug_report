@@ -680,7 +680,7 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   1 row in set (0.00 sec)
   ```
 
-* #5 [https://jira.mariadb.org/browse/MDEV-33745](https://jira.mariadb.org/browse/MDEV-33745)
+* #5 [https://jira.mariadb.org/browse/MDEV-33745](https://jira.mariadb.org/browse/MDEV-33345)
 
   **Status**: open
 
@@ -709,7 +709,7 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   1 row in set (0.00 sec)
   ```
 
-* #6 [https://jira.mariadb.org/browse/MDEV-33737](https://jira.mariadb.org/browse/MDEV-33737)
+* #6 [https://jira.mariadb.org/browse/MDEV-33737](https://jira.mariadb.org/browse/MDEV-33337)
 
   **Status**: open
 
@@ -733,7 +733,7 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   1 row in set (0.00 sec)
   ```
 
-* #7 [https://jira.mariadb.org/browse/MDEV-33736](https://jira.mariadb.org/browse/MDEV-33736)
+* #7 [https://jira.mariadb.org/browse/MDEV-33736](https://jira.mariadb.org/browse/MDEV-33336)
 
   **Status**: open
 
@@ -762,7 +762,7 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   1 row in set (0.00 sec)
   ```
 
-* #8 [https://jira.mariadb.org/browse/MDEV-33735](https://jira.mariadb.org/browse/MDEV-33735)
+* #8 [https://jira.mariadb.org/browse/MDEV-33735](https://jira.mariadb.org/browse/MDEV-33335)
 
   **Status**: open
 
