@@ -1,5 +1,5 @@
 # Sonar_bugreports
-This page lists all bugs found by Sonar (https://github.com/Syang111/Sonar). Up to now, we have found 37 unique bugs in MySQL, TiDB, MariaDB and SQLite,  with 29 verified and 8 fixed by developers.
+This page lists all bugs found by Sonar (https://github.com/Syang111/Sonar). Up to now, we have found 37 unique bugs in MySQL, TiDB, MariaDB and SQLite,  with 29 verified and 11 fixed by developers.
 
 To alleviate the burden on developers in identifying the root cause, we have simplified some test cases for bugs discovered by Sonar before reporting them to developers. Therefore, you will find the test cases are not always the oracle form of Sonar.
 
