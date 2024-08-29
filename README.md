@@ -324,7 +324,7 @@ To alleviate the burden on developers in identifying the root cause, we have sim
 
 * #1 [https://github.com/pingcap/tidb/issues/51842](https://github.com/pingcap/tidb/issues/51842)
 
-  **Status**: Verified
+  **Status**: fixed
 
   **Version**: v6.4.0, v7.6.0
 
@@ -377,7 +377,7 @@ To alleviate the burden on developers in identifying the root cause, we have sim
   ```
 * #3 [https://github.com/pingcap/tidb/issues/51840](https://github.com/pingcap/tidb/issues/51840)
 
-  **Status**: Verified
+  **Status**: fixed
 
   **Version**: v5.0.1,v7.6.0 
 
@@ -523,7 +523,7 @@ To alleviate the burden on developers in identifying the root cause, we have sim
 
 * #8 [https://github.com/pingcap/tidb/issues/51290](https://github.com/pingcap/tidb/issues/51290)
 
-  **Status**: Verified
+  **Status**: fixed
 
   **Version**: v7.5.0 
 
